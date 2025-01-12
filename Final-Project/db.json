@@ -1,0 +1,14 @@
+{
+    "users": [
+      {
+        "id": 1,
+        "username": "me",
+        "password": "123456",
+        "name": "Test User"
+      }
+    ],
+    "todos": [],
+    "posts": [],
+    "albums": []
+  }
+  
