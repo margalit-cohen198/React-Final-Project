@@ -5,7 +5,7 @@ function Login() {
     const [password, setPassword] = useState("");
     async function getUsers() {
         try {
-            const response = await fetch("http://localhost:5173/users", { method: 'GET' });
+            const response = await fetch("https://my-json-server.typicode.com/margalit-cohen198/React-Final-Project/users", { method: 'GET' });
             if (response.ok) {
                 return await response.json(); // החזר את המידע
             }

@@ -5,10 +5,26 @@
         "username": "me",
         "password": "123456",
         "name": "Test User",
-        "todos": [],
+        "todos": [
+          {
+            "id": 1,
+            "title": "Buy groceries",
+            "completed": false
+          },
+          {
+            "id": 2,
+            "title": "Finish React project",
+            "completed": true
+          },
+          {
+            "id": 3,
+            "title": "Read a book",
+            "completed": false
+          }
+        ],
         "posts": [],
         "albums": []
       }
     ]
-
   }
+  
