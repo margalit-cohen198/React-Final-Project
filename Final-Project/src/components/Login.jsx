@@ -3,9 +3,10 @@ import React, { useState } from "react";
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
     async function getUsers() {
         try {
-            const response = await fetch("https://my-json-server.typicode.com/margalit-cohen198/React-Final-Project/users", { method: 'GET' });
+            const response = await fetch(`http://localhost:3000/users?username=${username}&password=${password}`, { method: 'GET' });
             if (response.ok) {
                 return await response.json(); // החזר את המידע
             }
@@ -15,11 +16,13 @@ function Login() {
         }
         return []; // החזר מערך ריק אם יש בעיה
     }
+
     async function handleLogin() {
+        let user = null;
         const users = await getUsers();
-        const user = users.find(
-            (user) => user.username === username && user.password === password
-        );
+        if (users.length > 0) {
+            user = users[0];
+        }
         if (user) {
             localStorage.setItem("currentUser", JSON.stringify(user));
             alert("Login successful");
