@@ -7,6 +7,7 @@ import Info from "./components/Info";
 import Todos from "./components/Todos";
 import Posts from "./components/Posts";
 import Albums from "./components/Albums";
+import Photos from "./components/Photos";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/todos" element={<Todos />} />
         <Route path="/posts" element={<Posts />} />
         <Route path="/albums" element={<Albums />} />
+        <Route path="/albums/:id" element={<Photos />} />
       </Routes>
     </Router>
   );

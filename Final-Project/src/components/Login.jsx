@@ -1,17 +1,18 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
     async function getUsers() {
         try {
-            const response = await fetch(`http://localhost:3000/users?username=${username}&password=${password}`, { method: 'GET' });
+            const response = await fetch(`http://localhost:3000/users?username=${username}&website=${password}`, { method: 'GET' });
             if (response.ok) {
                 return await response.json(); // החזר את המידע
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.log(error);
         }
         return []; // החזר מערך ריק אם יש בעיה
@@ -26,11 +27,11 @@ function Login() {
         if (user) {
             localStorage.setItem("currentUser", JSON.stringify(user));
             alert("Login successful");
-            window.location.href = "/home";
+            navigate("/home");
         } else {
             alert("Invalid username or password");
         }
-    };
+    }
 
     return (
         <div>
@@ -48,6 +49,8 @@ function Login() {
                 onChange={(e) => setPassword(e.target.value)}
             />
             <button onClick={handleLogin}>Login</button>
+            <p>Don't have an account?</p>
+            <button onClick={() => navigate("/register")}>Go to Register</button>
         </div>
     );
 }
