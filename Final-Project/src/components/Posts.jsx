@@ -1,62 +1,82 @@
+
 import React, { useState, useEffect } from "react";
 
-const Posts = () => {
+const App = () => {
     const [posts, setPosts] = useState([]);
-    const [postTitle, setPostTitle] = useState("");
-    const [postContent, setPostContent] = useState("");
-    const [selectedPost, setSelectedPost] = useState(null);
     const [comments, setComments] = useState([]);
-    const [userId, setUserId] = useState(null); // שמירת userId ב-state
+    const [currentUser, setCurrentUser] = useState(null);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [newPostTitle, setNewPostTitle] = useState("");
+    const [newPostContent, setNewPostContent] = useState("");
+    const [newCommentBody, setNewCommentBody] = useState("");
 
+    // Load current user from localStorage
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("currentUser"));
-        if (user && user.id) {
-            setUserId(user.id); // הגדרת userId פעם אחת
+        if (user) {
+            setCurrentUser(user);
         }
-
-        async function fetchPosts() {
-            try {
-                const response = await fetch(`http://localhost:3000/posts?userId=${user.id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setPosts(data || []);
-                } else {
-                    console.error("Failed to fetch posts");
-                }
-            } catch (error) {
-                console.error("Error fetching posts", error);
-            }
-        }
-
-        if (user && user.id) fetchPosts();
     }, []);
 
+    // Fetch posts for the current user
+    useEffect(() => {
+        if (currentUser && currentUser.id) {
+            fetchPosts(currentUser.id);
+        }
+    }, [currentUser]);
+
+    const fetchPosts = async (userId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/posts?userId=${userId}`);
+            if (response.ok) {
+                const data = await response.json();
+                setPosts(data || []);
+            } else {
+                console.error("Failed to fetch posts");
+            }
+        } catch (error) {
+            console.error("Error fetching posts", error);
+        }
+    };
+
+    const fetchComments = async (postId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/posts/${postId}/comments`);
+            if (response.ok) {
+                const data = await response.json();
+                setComments(data || []);
+            } else {
+                console.error("Failed to fetch comments");
+            }
+        } catch (error) {
+            console.error("Error fetching comments", error);
+        }
+    };
+
     const addPost = async () => {
-        if (!postTitle || !postContent) {
+        if (!newPostTitle || !newPostContent) {
             alert("Please provide both title and content for the post.");
             return;
         }
 
         const newPost = {
-            title: postTitle,
-            content: postContent,
-            userId, // שימוש ב-userId מ-state
+            title: newPostTitle,
+            content: newPostContent,
+            userId: currentUser.id,
         };
 
         try {
-            const response = await fetch(`http://localhost:3000/posts`, {
+            const response = await fetch("http://localhost:3000/posts", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newPost),
             });
 
             if (response.ok) {
                 const createdPost = await response.json();
                 setPosts([...posts, createdPost]);
-                setPostTitle("");
-                setPostContent("");
+                setNewPostTitle("");
+                setNewPostContent("");
             } else {
                 console.error("Failed to add post");
             }
@@ -85,18 +105,12 @@ const Posts = () => {
         try {
             const response = await fetch(`http://localhost:3000/posts/${postId}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title: newTitle, content: newContent }),
             });
 
             if (response.ok) {
-                setPosts(
-                    posts.map((post) =>
-                        post.id === postId ? { ...post, title: newTitle, content: newContent } : post
-                    )
-                );
+                setPosts(posts.map((post) => (post.id === postId ? { ...post, title: newTitle, content: newContent } : post)));
             } else {
                 console.error("Failed to update post");
             }
@@ -105,38 +119,82 @@ const Posts = () => {
         }
     };
 
-    const fetchComments = async (postId) => {
+    const addComment = async (postId) => {
+        if (!newCommentBody) {
+            alert("Please provide content for the comment.");
+            return;
+        }
+
+        const newComment = {
+            postId,
+            body: newCommentBody,
+            name: currentUser.name,
+            email: currentUser.email,
+        };
+
         try {
-            const response = await fetch(`http://localhost:3000/posts/${postId}/comments`);
+            const response = await fetch(`http://localhost:3000/comments`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newComment),
+            });
+
             if (response.ok) {
-                const data = await response.json();
-                setComments(data || []);
+                const createdComment = await response.json();
+                setComments([...comments, createdComment]);
+                setNewCommentBody("");
             } else {
-                console.error("Failed to fetch comments");
+                console.error("Failed to add comment");
             }
         } catch (error) {
-            console.error("Error fetching comments", error);
+            console.error("Error adding comment", error);
+        }
+    };
+
+    const deleteComment = async (commentId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/comments/${commentId}`, {
+                method: "DELETE",
+            });
+
+            if (response.ok) {
+                setComments(comments.filter((comment) => comment.id !== commentId));
+            } else {
+                console.error("Failed to delete comment");
+            }
+        } catch (error) {
+            console.error("Error deleting comment", error);
         }
     };
 
     return (
         <div>
-            <h2>Posts for User {userId || "Unknown"}</h2>
+            <h2>Welcome, {currentUser?.name || "Guest"}</h2>
 
-            {/* Post List */}
+            {/* Add Post Section */}
+            <div>
+                <h3>Add a New Post</h3>
+                <input
+                    type="text"
+                    placeholder="Title"
+                    value={newPostTitle}
+                    onChange={(e) => setNewPostTitle(e.target.value)}
+                />
+                <textarea
+                    placeholder="Content"
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                />
+                <button onClick={addPost}>Add Post</button>
+            </div>
+
+            {/* Post List Section */}
+            <h3>Your Posts</h3>
             <ul>
                 {posts.map((post) => (
                     <li key={post.id}>
-                        <p>{post.title}</p>
-                        <button
-                            onClick={() => {
-                                setSelectedPost(post);
-                                fetchComments(post.id);
-                            }}
-                        >
-                            View
-                        </button>
-                        <button onClick={() => deletePost(post.id)}>Delete</button>
+                        <strong>{post.title}</strong>
+                        <button onClick={() => fetchComments(post.id)}>View Comments</button>
                         <button
                             onClick={() =>
                                 updatePost(
@@ -148,43 +206,35 @@ const Posts = () => {
                         >
                             Edit
                         </button>
+                        <button onClick={() => deletePost(post.id)}>Delete</button>
                     </li>
                 ))}
             </ul>
 
-            {/* Add New Post */}
-            <div>
-                <h3>Add New Post</h3>
-                <input
-                    type="text"
-                    placeholder="Post Title"
-                    value={postTitle}
-                    onChange={(e) => setPostTitle(e.target.value)}
-                />
-                <input
-                    type="text"
-                    placeholder="Post Content"
-                    value={postContent}
-                    onChange={(e) => setPostContent(e.target.value)}
-                />
-                <button onClick={addPost}>Add Post</button>
-            </div>
-
-            {/* Selected Post and Comments */}
+            {/* Comments Section */}
             {selectedPost && (
                 <div>
-                    <h3>{selectedPost.title}</h3>
-                    <p>{selectedPost.content}</p>
-                    <h4>Comments</h4>
+                    <h3>Comments for {selectedPost.title}</h3>
                     <ul>
                         {comments.map((comment) => (
-                            <li key={comment.id}>{comment.content}</li>
+                            <li key={comment.id}>
+                                <p>{comment.body}</p>
+                                {comment.email === currentUser.email && (
+                                    <button onClick={() => deleteComment(comment.id)}>Delete</button>
+                                )}
+                            </li>
                         ))}
                     </ul>
+                    <textarea
+                        placeholder="Add a comment"
+                        value={newCommentBody}
+                        onChange={(e) => setNewCommentBody(e.target.value)}
+                    />
+                    <button onClick={() => addComment(selectedPost.id)}>Add Comment</button>
                 </div>
             )}
         </div>
     );
 };
 
-export default Posts;
+export default App;

@@ -6,38 +6,51 @@ const Photos = () => {
     const [photos, setPhotos] = useState([]);
     const [photoTitle, setPhotoTitle] = useState("");
     const [photoUrl, setPhotoUrl] = useState("");
+    const [page, setPage] = useState(1); // עמוד נוכחי
+    const [hasMore, setHasMore] = useState(true); // בודק אם יש עוד תמונות לטעון
+
+    const PHOTOS_PER_PAGE = 1; // מספר התמונות בכל טעינה
 
     useEffect(() => {
-        async function fetchPhotos() {
+        const fetchPhotos = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:3000/photos?albumId=${albumId}`
+                    `http://localhost:3000/photos?albumId=${albumId}&_page=${page}&_limit=${PHOTOS_PER_PAGE}`
                 );
                 if (response.ok) {
-                    const photos = await response.json();
-                    setPhotos(photos || []);
+                    const newPhotos = await response.json();
+                    setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
+                    if (newPhotos.length < PHOTOS_PER_PAGE) {
+                        setHasMore(false); // אם אין יותר תמונות, נעצור את הטעינה
+                    }
                 } else {
                     console.log("Failed to fetch photos");
                 }
             } catch (error) {
                 console.log("Error fetching photos", error);
             }
-        }
+        };
         fetchPhotos();
-    }, []);
+    }, [page, albumId]);
+
+    const loadMorePhotos = () => {
+        if (hasMore) {
+            setPage((prevPage) => prevPage + 1); // טוען עמוד נוסף
+        }
+    };
 
     const addPhoto = async () => {
         if (!photoTitle || !photoUrl) {
             alert("Please provide both title and URL for the photo.");
             return;
         }
-    
+
         const newPhoto = {
             albumId: albumId,
             title: photoTitle,
             thumbnailUrl: photoUrl,
         };
-    
+
         try {
             const response = await fetch(`http://localhost:3000/photos`, {
                 method: "POST",
@@ -46,10 +59,10 @@ const Photos = () => {
                 },
                 body: JSON.stringify(newPhoto),
             });
-    
+
             if (response.ok) {
                 const addedPhoto = await response.json();
-                setPhotos([...photos, addedPhoto]); // מוסיף את התמונה עם ה-id מהשרת
+                setPhotos((prevPhotos) => [addedPhoto, ...prevPhotos]); // מוסיף את התמונה לראש הרשימה
                 setPhotoTitle("");
                 setPhotoUrl("");
             } else {
@@ -59,14 +72,15 @@ const Photos = () => {
             console.log("Error adding photo", error);
         }
     };
-    
 
     const deletePhoto = async (photoId) => {
         try {
             await fetch(`http://localhost:3000/photos/${photoId}`, {
                 method: "DELETE",
             });
-            setPhotos(photos.filter((photo) => photo.id !== photoId));
+            setPhotos((prevPhotos) =>
+                prevPhotos.filter((photo) => photo.id !== photoId)
+            );
         } catch (error) {
             console.log("Error deleting photo", error);
         }
@@ -81,8 +95,8 @@ const Photos = () => {
                 },
                 body: JSON.stringify({ title: newTitle, thumbnailUrl: newUrl }),
             });
-            setPhotos(
-                photos.map((photo) =>
+            setPhotos((prevPhotos) =>
+                prevPhotos.map((photo) =>
                     photo.id === photoId
                         ? { ...photo, title: newTitle, thumbnailUrl: newUrl }
                         : photo
@@ -122,6 +136,9 @@ const Photos = () => {
                     </li>
                 ))}
             </ul>
+            {hasMore && (
+                <button onClick={loadMorePhotos}>Load More Photos</button>
+            )}
             <div>
                 <h3>Add New Photo</h3>
                 <input

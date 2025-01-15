@@ -6,10 +6,17 @@ const Todos = () => {
     const [sortCriteria, setSortCriteria] = useState("id");
     const [searchCriteria, setSearchCriteria] = useState("id");
     const [searchValue, setSearchValue] = useState("");
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("currentUser"));
-        const userId = user.id;
+        if (user) {
+            setUserId(user.id);
+        }
+    }, []); // מתבצע רק פעם אחת בהתחלה
+
+    useEffect(() => {
+        if (userId === null) return; // מוודא ש-id קיים לפני ביצוע הקריאה
 
         const getUserTodos = async () => {
             try {
@@ -25,7 +32,8 @@ const Todos = () => {
         };
 
         getUserTodos();
-    }, []);
+    }, [userId]); // מאזין לשינוי של userId
+
 
     const updateUserTodo = async (updatedTodo) => {
         try {
@@ -132,12 +140,13 @@ const Todos = () => {
 
     const filterTodos = () => {
         const filtered = todos.filter((todo) => {
-            if (searchCriteria === "id") return todo.id === parseInt(searchValue);
-            if (searchCriteria === "title") return todo.title.toLowerCase().includes(searchValue.toLowerCase());
+            if (searchCriteria === "id") return todo.id === searchValue;
+            if (searchCriteria === "title") return todo.title?.toLowerCase().includes(searchValue.toLowerCase());
             if (searchCriteria === "completed") return todo.completed === (searchValue.toLowerCase() === "true");
         });
         setFilteredTodos(filtered);
     };
+
 
     return (
         <div>

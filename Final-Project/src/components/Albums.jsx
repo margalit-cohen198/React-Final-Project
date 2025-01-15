@@ -7,34 +7,37 @@ const Albums = () => {
   const [searchCriteria, setSearchCriteria] = useState("id");
   const [searchValue, setSearchValue] = useState("");
   const navigate = useNavigate();
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-
-    async function fetchAlbums() {
-      const user = JSON.parse(localStorage.getItem("currentUser"));
-      const userId = user.id;
-      try {
-        const response = await fetch(
-          `http://localhost:3000/albums?userId=${userId}`
-        );
-        if (response.ok) {
-          const albums = await response.json();
-          if (albums.length > 0) {
-            setAlbums(albums || []);
-            setFilteredAlbums(albums || []);
+      async function fetchAlbums() {
+        const user = JSON.parse(localStorage.getItem("currentUser"));
+        const userId = user.id;
+        setUserId(userId); // שמירת userId ב-state
+    
+        try {
+          const response = await fetch(
+            `http://localhost:3000/albums?userId=${userId}`
+          );
+          if (response.ok) {
+            const albums = await response.json();
+            if (albums.length > 0) {
+              setAlbums(albums || []);
+              setFilteredAlbums(albums || []);
+            }
           }
+        } catch (error) {
+          console.log("Error fetching albums:", error);
         }
-      } catch (error) {
-        console.log("Error fetching albums:", error);
       }
-    }
-    fetchAlbums();
-  }, []);
+      fetchAlbums();
+    }, []);
+    
 
   const filterAlbums = () => {
     const filtered = albums.filter((album) => {
       if (searchCriteria === "id") {
-        return album.id === parseInt(searchValue);
+        return album.id === searchValue;
       } else if (searchCriteria === "title") {
         return album.title.toLowerCase().includes(searchValue.toLowerCase());
       }
@@ -73,11 +76,30 @@ const Albums = () => {
     }
   };
 
+  const deleteAlbum = async (albumId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/albums/${albumId}`, {
+        method: "DELETE",
+      });
+  
+      if (response.ok) {
+        // עדכון הרשימות לאחר מחיקה
+        setAlbums((prev) => prev.filter((album) => album.id !== albumId));
+        setFilteredAlbums((prev) => prev.filter((album) => album.id !== albumId));
+      } else {
+        console.log("Failed to delete album");
+      }
+    } catch (error) {
+      console.log("Error deleting album:", error);
+    }
+  };
+  
+
 
   return (
     <div>
       <h2>Albums</h2>
-
+  
       <div>
         <label>Search by:</label>
         <select
@@ -95,20 +117,23 @@ const Albums = () => {
         />
         <button onClick={filterAlbums}>Search</button>
       </div>
-
+  
       <ul>
         {filteredAlbums.map((album) => (
           <li key={album.id}>
             <span>
-              Album Id: {album.id}  Album Name: {album.title}
+              Album Id: {album.id} <br></br> Album Name: {album.title}<br></br>
             </span>
             <button onClick={() => navigate(`/albums/${album.id}`)}>
               View Photos
             </button>
+            <button onClick={() => deleteAlbum(album.id)}>
+              Delete Album
+            </button>
           </li>
         ))}
       </ul>
-
+  
       <div>
         <input
           type="text"
@@ -125,6 +150,7 @@ const Albums = () => {
       </div>
     </div>
   );
+  
 };
 
 export default Albums;
