@@ -24,35 +24,42 @@ const Photos = () => {
             }
         }
         fetchPhotos();
-    }, [albumId]);
+    }, []);
 
     const addPhoto = async () => {
         if (!photoTitle || !photoUrl) {
             alert("Please provide both title and URL for the photo.");
             return;
         }
-
+    
         const newPhoto = {
+            albumId: albumId,
             title: photoTitle,
             thumbnailUrl: photoUrl,
         };
-
+    
         try {
-            await fetch(`http://localhost:3000/photos`, {
+            const response = await fetch(`http://localhost:3000/photos`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(newPhoto),
             });
-
-            setPhotos([...photos, newPhoto]);
-            setPhotoTitle("");
-            setPhotoUrl("");
+    
+            if (response.ok) {
+                const addedPhoto = await response.json();
+                setPhotos([...photos, addedPhoto]); // מוסיף את התמונה עם ה-id מהשרת
+                setPhotoTitle("");
+                setPhotoUrl("");
+            } else {
+                console.log("Failed to add photo");
+            }
         } catch (error) {
             console.log("Error adding photo", error);
         }
     };
+    
 
     const deletePhoto = async (photoId) => {
         try {

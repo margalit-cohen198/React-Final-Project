@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
-    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
     async function getUsers() {
         try {
-            const response = await fetch(`http://localhost:3000/users?username=${username}&website=${password}`, { method: 'GET' });
+            const response = await fetch(`http://localhost:3000/users?email=${email}&website=${password}`, { method: 'GET' });
             if (response.ok) {
                 return await response.json(); // החזר את המידע
             }
@@ -29,7 +29,7 @@ function Login() {
             alert("Login successful");
             navigate("/home");
         } else {
-            alert("Invalid username or password");
+            alert("Invalid email or password");
         }
     }
 
@@ -38,9 +38,9 @@ function Login() {
             <h2>Login</h2>
             <input
                 type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
             />
             <input
                 type="password"

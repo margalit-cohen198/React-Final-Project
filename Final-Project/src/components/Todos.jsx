@@ -20,7 +20,7 @@ const Todos = () => {
                     setFilteredTodos(todos);
                 }
             } catch (error) {
-                console.error("Error fetching todos:", error);
+                console.log("Error fetching todos:", error);
             }
         };
 
@@ -43,8 +43,8 @@ const Todos = () => {
 
     const addTodo = async (title) => {
         const newTodo = {
-            id: todos.length ? todos[todos.length - 1].id + 1 : 1,
-            title,
+            userId: userId,
+            title: title,
             completed: false,
         };
         try {

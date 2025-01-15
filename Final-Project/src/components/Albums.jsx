@@ -9,10 +9,10 @@ const Albums = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    const userId = user?.id;
 
     async function fetchAlbums() {
+      const user = JSON.parse(localStorage.getItem("currentUser"));
+      const userId = user.id;
       try {
         const response = await fetch(
           `http://localhost:3000/albums?userId=${userId}`
@@ -38,7 +38,6 @@ const Albums = () => {
       } else if (searchCriteria === "title") {
         return album.title.toLowerCase().includes(searchValue.toLowerCase());
       }
-      return false;//אפשר להוריד?
     });
     setFilteredAlbums(filtered);
   };
@@ -49,11 +48,10 @@ const Albums = () => {
       return;
     }
     const newAlbum = {
-      id: albums.length ? albums[albums.length - 1].id + 1 : 1,
-      title,
-      photos: [],
+      userId: userId,
+      title: title
     };
-  
+
     try {
       const response = await fetch(`http://localhost:3000/albums`, {
         method: "POST",
@@ -62,19 +60,19 @@ const Albums = () => {
         },
         body: JSON.stringify(newAlbum),
       });
-  
+
       if (response.ok) {
         const addedAlbum = await response.json();
         setAlbums((prev) => [...prev, addedAlbum]);
         setFilteredAlbums((prev) => [...prev, addedAlbum]);
       } else {
-        console.error("Failed to add album");
+        console.log("Failed to add album");
       }
     } catch (error) {
-      console.error("Error adding album:", error);
+      console.log("Error adding album:", error);
     }
   };
-  
+
 
   return (
     <div>
