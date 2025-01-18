@@ -192,7 +192,7 @@ const Todos = () => {
                             checked={todo.completed}
                             onChange={() => toggleCompletion(todo.id)}
                         />
-                        <span>Id: {todo.id} Title: {todo.title}</span>
+                        <span> Id: {todo.id} | Title: {todo.title}</span>
                         <button onClick={() => updateTodo(todo.id, prompt("New title:"))}>
                             Edit
                         </button>

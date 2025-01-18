@@ -1,42 +1,148 @@
-#root {
-  max-width: 1280px;
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+}
+
+body {
+  background-color: #f4f4f4;
+  color: #333;
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+h1, h2, h3, h4 {
+  color: var(--primary-color);
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+h3 {
+  font-size: 1.5rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Buttons */
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+button:hover {
+  background-color: var(--primary-color-hover);
 }
 
-.card {
-  padding: 2em;
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
-.read-the-docs {
-  color: #888;
+/* Inputs */
+input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+/* Lists */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  background-color: #fafafa;
+  margin-bottom: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+li span {
+  font-size: 1rem;
+}
+
+li button {
+  background-color: #e53e3e;
+  margin-left: 10px;
+}
+
+li button:hover {
+  background-color: #c53030;
+}
+
+/* Links */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: var(--primary-color);
+  color: white;
+  margin-top: 40px;
+}
+
+/* Custom Properties */
+:root {
+  --primary-color: #3498db; /* Blue */
+  --primary-color-hover: #2980b9;
+  --secondary-color: #2ecc71; /* Green */
+  --text-color: #333;
+  --background-color: #f4f4f4;
+}
+
+/* Specific Page Styles */
+.login, .photos, .todos, .info {
+  margin-top: 20px;
+}
+
+/* Loading Spinner */
+.loading {
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
+/* Error Messages */
+.error {
+  color: red;
+  font-weight: bold;
+  margin-top: 20px;
 }

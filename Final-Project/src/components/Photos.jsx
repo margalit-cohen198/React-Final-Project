@@ -6,36 +6,49 @@ const Photos = () => {
     const [photos, setPhotos] = useState([]);
     const [photoTitle, setPhotoTitle] = useState("");
     const [photoUrl, setPhotoUrl] = useState("");
-    const [page, setPage] = useState(1); // עמוד נוכחי
-    const [hasMore, setHasMore] = useState(true); // בודק אם יש עוד תמונות לטעון
+    const [start, setStart] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
 
-    const PHOTOS_PER_PAGE = 1; // מספר התמונות בכל טעינה
+    const PHOTOS_PER_PAGE = 3;
 
     useEffect(() => {
         const fetchPhotos = async () => {
             try {
+                console.log("Fetching photos for page:", start);
                 const response = await fetch(
-                    `http://localhost:3000/photos?albumId=${albumId}&_page=${page}&_limit=${PHOTOS_PER_PAGE}`
+                    `http://localhost:3000/photos?albumId=${albumId}&_start=${start}&_limit=${PHOTOS_PER_PAGE}`
                 );
                 if (response.ok) {
                     const newPhotos = await response.json();
-                    setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
+                    setPhotos((prevPhotos) => {
+                        const allPhotos = [...prevPhotos];
+                        newPhotos.forEach(photo => {
+                            if (!allPhotos.some(p => p.id === photo.id)) {
+                                allPhotos.push(photo);
+                            }
+                        });
+                        return allPhotos;
+                    });
+
+                    console.log("Fetched photos:", newPhotos);
                     if (newPhotos.length < PHOTOS_PER_PAGE) {
-                        setHasMore(false); // אם אין יותר תמונות, נעצור את הטעינה
+                        console.log("No more photos to load");
+                        setHasMore(false);
                     }
                 } else {
-                    console.log("Failed to fetch photos");
+                    console.error("Failed to fetch photos");
                 }
             } catch (error) {
-                console.log("Error fetching photos", error);
+                console.error("Error fetching photos:", error);
             }
         };
+
         fetchPhotos();
-    }, [page, albumId]);
+    }, [start, albumId]);
 
     const loadMorePhotos = () => {
         if (hasMore) {
-            setPage((prevPage) => prevPage + 1); // טוען עמוד נוסף
+            setStart((prev) => prev + PHOTOS_PER_PAGE);
         }
     };
 
@@ -62,7 +75,7 @@ const Photos = () => {
 
             if (response.ok) {
                 const addedPhoto = await response.json();
-                setPhotos((prevPhotos) => [addedPhoto, ...prevPhotos]); // מוסיף את התמונה לראש הרשימה
+                setPhotos((prevPhotos) => [addedPhoto, ...prevPhotos]);
                 setPhotoTitle("");
                 setPhotoUrl("");
             } else {
@@ -114,6 +127,7 @@ const Photos = () => {
                 {photos.map((photo) => (
                     <li key={photo.id}>
                         <p>{photo.title}</p>
+                        <p>{photo.id}</p>
                         <img
                             src={photo.thumbnailUrl}
                             alt={photo.title}
